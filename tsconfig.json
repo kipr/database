@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "outDir": "dist",
+    "baseUrl": ".",
+    "esModuleInterop": true
+  },
+  "include": [
+    "src/**/*"
+  ]
+}

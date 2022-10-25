@@ -1,0 +1,16 @@
+{
+  "name": "database",
+  "version": "0.1.0",
+  "description": "KIPR database backend for KIPR web products",
+  "main": "dist/index.js",
+  "repository": "https://github.com/kipr/database",
+  "author": "KISS Institute for Practical Robotics",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "database-model": "github:kipr/database-model",
+    "fastify": "^4.9.2",
+    "firebase-admin": "^11.2.0",
+    "ioredis": "^5.2.3"
+  }
+}
