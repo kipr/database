@@ -15,10 +15,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout simulator repo
+    - name: Checkout database repo
       uses: actions/checkout@v2
       with:
-        path: simulator-repo
+        path: database-repo
     
     # Ensure tag matches package.json version
     - name: Check tag and package version
@@ -28,7 +28,7 @@ jobs:
         TAG_VERSION=${GITHUB_REF#refs/tags/v}
         if [[ "$PACKAGE_VERSION" != "$TAG_VERSION" ]]; then exit 1; fi
         echo "::set-output name=VERSION::${TAG_VERSION}"
-      working-directory: simulator-repo
+      working-directory: database-repo
 
     # Setup gcloud CLI
     - name: Set up gcloud CLI
