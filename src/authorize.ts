@@ -11,9 +11,10 @@ export namespace AuthorizeResult {
 
   export interface NotAuthorized {
     type: Type.NotAuthorized;
+    exists: boolean;
   }
 
-  export const NOT_AUTHORIZED: NotAuthorized = { type: Type.NotAuthorized };
+  export const notAuthorized = (exists: boolean): NotAuthorized => ({ type: Type.NotAuthorized, exists });
 
   export interface Authorized {
     type: Type.Authorized;
@@ -27,17 +28,17 @@ export type AuthorizeResult = AuthorizeResult.NotAuthorized | AuthorizeResult.Au
 
 export default async (recordSelector: Selector, userId: string, db: Db): Promise<AuthorizeResult> => {
   const res = await db.get({ selector: recordSelector });
-  if (res.type === 'error') return AuthorizeResult.NOT_AUTHORIZED;
+  if (res.type === 'error') return AuthorizeResult.notAuthorized(false);
   const { value } = res;
-  if (!value || typeof value !== 'object') return AuthorizeResult.NOT_AUTHORIZED;
+  if (!value || typeof value !== 'object') return AuthorizeResult.notAuthorized(false);
 
-  if (!('author' in value)) return AuthorizeResult.NOT_AUTHORIZED;
+  if (!('author' in value)) return AuthorizeResult.notAuthorized(true);
 
   const author = value['author'] as Author;
   // Organizations aren't yet supported.
-  if (author.type === Author.Type.Organization) return AuthorizeResult.NOT_AUTHORIZED;
+  if (author.type === Author.Type.Organization) return AuthorizeResult.notAuthorized(true);
   
   return author.id === userId
     ? AuthorizeResult.authorized(value)
-    : AuthorizeResult.NOT_AUTHORIZED;
+    : AuthorizeResult.notAuthorized(true);
 };

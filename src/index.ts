@@ -72,6 +72,8 @@ app.get('/:collection', async (request, reply) => {
 app.post('/:collection/:id', async (request, reply) => {
   const token = await authenticate(request);
 
+  console.log('token', token);
+
   if (!token) return unauthorized(reply);
 
   const { collection, id } = request.params as { collection: string; id: string; };
@@ -79,7 +81,7 @@ app.post('/:collection/:id', async (request, reply) => {
   const selector: Selector = { collection, id };
 
   const authRes = await authorize(selector, token.sub, db);
-  if (authRes.type === AuthorizeResult.Type.NotAuthorized) return unauthorized(reply);
+  if (authRes.type === AuthorizeResult.Type.NotAuthorized && authRes.exists) return unauthorized(reply);
   
   const value = request.body as object;
 

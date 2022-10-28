@@ -62,6 +62,10 @@ class Db {
       .set(value);
 
     await this.cache_.set(selector, value);
+
+    return {
+      type: 'success',
+    };
   }
 
   async delete({ selector }: Delete.Request): Promise<Delete.Response> {
