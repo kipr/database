@@ -1,7 +1,7 @@
 import Cache from './Cache';
 
 import Redis, { RedisOptions } from 'ioredis';
-import Selector from 'database-model/Selector';
+import Selector from './model/Selector';
 
 class RedisCache implements Cache {
   private static DEFAULT_TTL = 60 * 60 * 24 * 7;

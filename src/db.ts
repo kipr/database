@@ -1,10 +1,10 @@
-import Selector from 'database-model/Selector';
+import Selector from './model/Selector';
 import collections from './collections';
-import Get from 'database-model/Get';
-import Set from 'database-model/Set';
-import Delete from 'database-model/Delete';
-import Error from 'database-model/Error';
-import List from 'database-model/List';
+import Get from './model/Get';
+import Set from './model/Set';
+import Delete from './model/Delete';
+import Error from './model/Error';
+import List from './model/List';
 import firestore from './firestore';
 import Cache from './Cache';
 

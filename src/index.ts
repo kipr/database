@@ -3,11 +3,11 @@ import { DecodedIdToken } from 'firebase-admin/auth';
 import auth from './auth';
 import config from './config';
 
-import Author from 'database-model/Author';
-import Error from 'database-model/Error';
+import Author from './model/Author';
+import Error from './model/Error';
 import Db from './db';
 import RedisCache from './RedisCache';
-import Selector from 'database-model/Selector';
+import Selector from './model/Selector';
 import authorize, { AuthorizeResult } from './authorize';
 
 const UNAUTHORIZED_RESULT = { message: 'Unauthorized' };

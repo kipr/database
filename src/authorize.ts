@@ -1,5 +1,5 @@
-import Author from 'database-model/Author';
-import Selector from 'database-model/Selector';
+import Author from './model/Author';
+import Selector from './model/Selector';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import Db from './db';
 

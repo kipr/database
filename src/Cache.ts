@@ -1,5 +1,5 @@
 import Author from 'database-model/Author';
-import Selector from 'database-model/Selector';
+import Selector from './model/Selector';
 
 interface Cache {
   get(selector: Selector): Promise<object | null>;
