@@ -1,4 +1,4 @@
-import Author from 'database-model/Author';
+import Author from './model/Author';
 import Selector from './model/Selector';
 
 interface Cache {

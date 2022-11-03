@@ -7,9 +7,16 @@
   "author": "KISS Institute for Practical Robotics",
   "license": "UNLICENSED",
   "private": true,
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist"
+  },
   "dependencies": {
     "fastify": "^4.9.2",
     "firebase-admin": "^11.2.0",
     "ioredis": "^5.2.3"
+  },
+  "devDependencies": {
+    "typescript": "^4.8.4"
   }
 }
