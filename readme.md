@@ -33,6 +33,9 @@ Deletes the record with the given ID in the given collection.
 
 # Running
 
+## Dependencies
+ - [Redis](https://redis.io/)
+
 ## Setup
 
 ```sh
@@ -41,6 +44,8 @@ yarn build
 ```
 
 ## Execution
+
+Redis server must be running.
 
 ```sh
 FIREBASE_SERVICE_ACCOUNT_KEY_FILE=service_account_key.json FIREBASE_DATABASE_URL=https://kipr-321905-default-rtdb.firebaseio.com yarn start
@@ -53,3 +58,6 @@ where `service_account_key.json` is a service account key file for the Firestore
   - `FIREBASE_SERVICE_ACCOUNT_KEY_FILE` - Firebase service account key JSON (as a file path)
   - `FIREBASE_SERVICE_ACCOUNT_KEY_STRING` - Firebase service account key JSON (as a string)
   - `FIREBASE_DATABASE_URL` - Firebase database URL
+  - `REDIS_HOST` (default: `localhost`) - Redis host
+  - `REDIS_PORT` (default: `6379`) - Redis port
+  - `REDIS_PASSWORD` - Redis password
