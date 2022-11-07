@@ -80,11 +80,19 @@ app.post('/:collection/:id', async (request, reply) => {
   
   const selector: Selector = { collection, id };
 
-  const authRes = await authorize(selector, token.sub, db);
-  if (authRes.type === AuthorizeResult.Type.NotAuthorized && authRes.exists) return unauthorized(reply);
-  
   const value = request.body as object;
 
+  const authRes = await authorize(selector, token.sub, db);
+  if (authRes.type === AuthorizeResult.Type.NotAuthorized) {
+    if (authRes.exists) return unauthorized(reply);
+    if (!('author' in value)) return unauthorized(reply);
+    const author = value['author'];
+    if (!('type' in author)) return unauthorized(reply);
+    if (author.type !== Author.Type.User) return unauthorized(reply);
+    if (!('id' in author)) return unauthorized(reply);
+    if (author.id !== token.sub) return unauthorized(reply);
+  }
+  
   const res = await db.set({ selector: { collection, id }, value });
 
   if (res.type === 'error') {
