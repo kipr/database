@@ -81,6 +81,10 @@ class Db {
       .collection(selector.collection)
       .doc(selector.id)
       .delete();
+
+    return {
+      type: 'success',
+    };
   }
 
   async list({ author, collection }: List.Request): Promise<List.Response> {
