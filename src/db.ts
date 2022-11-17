@@ -22,12 +22,16 @@ class Db {
       message: `Collection "${selector.collection}" is invalid.`,
     };
 
-    const cached = await this.cache_.get(selector);
-  
-    if (cached) return {
-      type: 'success',
-      value: cached as T,
-    };
+    try {
+      const cached = await this.cache_.get(selector);
+    
+      if (cached) return {
+        type: 'success',
+        value: cached as T,
+      };
+    } catch (e) {
+      console.error(e);
+    }
 
     const doc = await firestore
       .collection(selector.collection)
@@ -40,9 +44,13 @@ class Db {
       message: `Document "${selector.id}" not found.`,
     };
 
-    // Update the cache
-    await this.cache_.set(selector, doc.data());
-  
+    try {
+      // Update the cache
+      await this.cache_.set(selector, doc.data());
+    } catch (e) {
+      console.error(e);
+    }
+
     return {
       type: 'success',
       value: doc.data() as T,
@@ -61,7 +69,11 @@ class Db {
       .doc(selector.id)
       .set(value);
 
-    await this.cache_.set(selector, value);
+    try {
+      await this.cache_.set(selector, value);
+    } catch (e) {
+      console.error(e);
+    }
 
     return {
       type: 'success',
@@ -75,7 +87,11 @@ class Db {
       message: `Collection "${selector.collection}" is invalid.`,
     };
 
-    await this.cache_.remove(selector);
+    try {
+      await this.cache_.remove(selector);
+    } catch (e) {
+      console.error(e);
+    }
 
     await firestore
       .collection(selector.collection)
