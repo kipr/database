@@ -37,6 +37,11 @@ const cache = new RedisCache({
 
 const db = new Db(cache);
 
+// silly liveness probe
+app.get('/', async (request, reply) => {
+  reply.send({ database: 'alive' });
+});
+
 app.get('/:collection/:id', async (request, reply) => {
   const token = await authenticate(request);
 
@@ -71,8 +76,6 @@ app.get('/:collection', async (request, reply) => {
 
 app.post('/:collection/:id', async (request, reply) => {
   const token = await authenticate(request);
-
-  console.log('token', token);
 
   if (!token) return unauthorized(reply);
 
