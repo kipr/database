@@ -106,6 +106,7 @@ jobs:
           --values ./database/values.prerelease.yaml \
           --set imageVersion=${{ needs.build-publish.outputs.image_version }} \
           --set secrets.serviceAccountKeyString=$FIRESTORE_SERVICE_ACCOUNT \
+          --set redisHost=redis-master.prerelease.svc.cluster.local \
           database-prerelease ./database
       shell: bash
       env:

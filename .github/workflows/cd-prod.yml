@@ -75,6 +75,7 @@ jobs:
           --namespace prod \
           --set imageVersion=${{ steps.check_version.outputs.VERSION }} \
           --set secrets.serviceAccountKeyString=$FIRESTORE_SERVICE_ACCOUNT \
+          --set redisHost=redis-master.prod.svc.cluster.local \
           database ./database
       shell: bash
       env:
