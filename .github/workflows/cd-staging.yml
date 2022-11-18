@@ -105,7 +105,7 @@ jobs:
           --namespace prerelease \
           --values ./database/values.prerelease.yaml \
           --set imageVersion=${{ needs.build-publish.outputs.image_version }} \
-          --set secrets.serviceAccountKeyString=$(echo $FIRESTORE_SERVICE_ACCOUNT | base64) \
+          --set secrets.serviceAccountKeyString=$(echo "$FIRESTORE_SERVICE_ACCOUNT" | base64) \
           database-prerelease ./database
       shell: bash
       env:

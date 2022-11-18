@@ -74,7 +74,7 @@ jobs:
           --install \
           --namespace prod \
           --set imageVersion=${{ steps.check_version.outputs.VERSION }} \
-          --set secrets.serviceAccountKeyString=$(echo $FIRESTORE_SERVICE_ACCOUNT | base64) \
+          --set secrets.serviceAccountKeyString=$(echo "$FIRESTORE_SERVICE_ACCOUNT" | base64) \
           database ./database
       shell: bash
       env:
