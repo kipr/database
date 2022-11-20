@@ -16,6 +16,7 @@ const databaseUrl = process.env.FIREBASE_DATABASE_URL;
 if (!databaseUrl) throw new Error('FIREBASE_DATABASE_URL is not set');
 
 export default {
+  host: process.env.HOST || '127.0.0.1',
   port: process.env.PORT || 4000,
   firebase: {
     serviceAccountKey,

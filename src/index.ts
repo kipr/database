@@ -133,6 +133,7 @@ app.delete('/:collection/:id', async (request, reply) => {
 
 const main = async () => {
   await app.listen({
+    host: config.host,
     port: +config.port,
   });
 };

@@ -54,6 +54,7 @@ FIREBASE_SERVICE_ACCOUNT_KEY_FILE=service_account_key.json FIREBASE_DATABASE_URL
 where `service_account_key.json` is a service account key file for the Firestore Admin SDK.
 
 ## Environment Variables
+  - `HOST` (default: `127.0.0.1`) - Host to bind to
   - `PORT` (default: `4000`) - Port to listen on
   - `FIREBASE_SERVICE_ACCOUNT_KEY_FILE` - Firebase service account key JSON (as a file path)
   - `FIREBASE_SERVICE_ACCOUNT_KEY_STRING` - Firebase service account key JSON (as a string)
