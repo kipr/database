@@ -4,6 +4,7 @@ import Error from './Error';
 namespace Delete {
   export interface Request<T = any> {
     selector: Selector;
+    userId?: string;
   }
 
   export namespace Response {
