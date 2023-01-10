@@ -4,6 +4,7 @@ import Error from './Error';
 namespace Set {
   export interface Request<T = any> {
     selector: Selector;
+    userId?: string;
     value: T;
   }
 

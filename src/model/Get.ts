@@ -4,6 +4,7 @@ import Error from './Error';
 namespace Get {
   export interface Request {
     selector: Selector;
+    userId?: string;
   }
 
   export namespace Response {
