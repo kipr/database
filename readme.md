@@ -56,7 +56,7 @@ where `service_account_key.json` is a service account key file for the Firestore
 ## Environment Variables
   - `HOST` (default: `127.0.0.1`) - Host to bind to
   - `PORT` (default: `4000`) - Port to listen on
-  - `FIREBASE_SERVICE_ACCOUNT_KEY_FILE` - Firebase service account key JSON (as a file path)
+  - `FIREBASE_SERVICE_ACCOUNT_KEY_FILE` - Firebase service account key JSON (as a file path). Only used if `FIREBASE_SERVICE_ACCOUNT_KEY_STRING` is not present
   - `FIREBASE_SERVICE_ACCOUNT_KEY_STRING` - Firebase service account key JSON (as a string)
   - `FIREBASE_DATABASE_URL` - Firebase database URL
   - `REDIS_HOST` (default: `localhost`) - Redis host
