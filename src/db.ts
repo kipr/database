@@ -9,6 +9,10 @@ import firestore from './firestore';
 import Cache from './Cache';
 import { CHALLENGE_COMPLETION_COLLECTION } from './model/constants';
 
+const USER_ID_REQUIRED = new Set([
+  CHALLENGE_COMPLETION_COLLECTION,
+]);
+
 class Db {
   private cache_: Cache;
 

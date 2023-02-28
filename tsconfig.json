@@ -2,7 +2,10 @@
   "compilerOptions": {
     "outDir": "dist",
     "baseUrl": ".",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "target": "ES2020",
+    "moduleResolution": "node",
+    "module": "CommonJS"
   },
   "include": [
     "src/**/*"

@@ -11,6 +11,8 @@ import Selector from './model/Selector';
 import authorize, { AuthorizeResult } from './authorize';
 import { CHALLENGE_COMPLETION_COLLECTION } from './model/constants';
 
+import bigStore from './big-store';
+
 const UNAUTHORIZED_RESULT = { message: 'Unauthorized' };
 const NOT_FOUND_RESULT = { message: 'Not Found' };
 
@@ -151,6 +153,8 @@ app.delete('/:collection/:id', async (request, reply) => {
     .code(204)
     .send();
 });
+
+bigStore(app, db);
 
 const main = async () => {
   await app.listen({

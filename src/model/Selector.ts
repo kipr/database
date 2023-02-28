@@ -2,6 +2,7 @@ import {
   SCENE_COLLECTION,
   CHALLENGE_COLLECTION,
   CHALLENGE_COMPLETION_COLLECTION,
+  BIG_STORE_COLLECTION,
 } from './constants';
 
 interface Selector {
@@ -22,6 +23,11 @@ namespace Selector {
 
   export const challengeCompletion = (id: string): Selector => ({
     collection: CHALLENGE_COMPLETION_COLLECTION,
+    id,
+  });
+
+  export const bigStore = (id: string): Selector => ({
+    collection: BIG_STORE_COLLECTION,
     id,
   });
 }
