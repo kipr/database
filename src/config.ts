@@ -21,8 +21,6 @@ if (googleStorageServiceAccountKeyString) {
   googleStorageServiceAccountKey = JSON.parse(googleStorageServiceAccountKeyString);
 } else if (googleStorageServiceAccountKeyFile) {
   googleStorageServiceAccountKey = JSON.parse(readFileSync(googleStorageServiceAccountKeyFile, 'utf8'));
-} else {
-  throw new Error('GOOGLE_STORAGE_SERVICE_ACCOUNT_KEY_STRING or GOOGLE_STORAGE_SERVICE_ACCOUNT_KEY_FILE must be set');
 }
 
 const databaseUrl = process.env.FIREBASE_DATABASE_URL;
@@ -43,10 +41,10 @@ if (!leaseKey) {
 }
 
 const googleStorageBucketName = process.env.GOOGLE_STORAGE_BUCKET_NAME;
-if (!googleStorageBucketName) throw new Error('GOOGLE_STORAGE_BUCKET_NAME is not set');
+// if (!googleStorageBucketName) throw new Error('GOOGLE_STORAGE_BUCKET_NAME is not set');
 
 const googleStorageProjectId = process.env.GOOGLE_STORAGE_PROJECT_ID;
-if (!googleStorageProjectId) throw new Error('GOOGLE_STORAGE_PROJECT_ID is not set');
+// if (!googleStorageProjectId) throw new Error('GOOGLE_STORAGE_PROJECT_ID is not set');
 
 const config = {
   host: process.env.HOST || '127.0.0.1',

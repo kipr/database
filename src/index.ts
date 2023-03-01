@@ -154,7 +154,10 @@ app.delete('/:collection/:id', async (request, reply) => {
     .send();
 });
 
-bigStore(app, db);
+if (config.googleStorage.serviceAccountKey && config.googleStorage.projectId && config.googleStorage.bucketName) {
+  bigStore(app, db);
+}
+
 
 const main = async () => {
   await app.listen({
