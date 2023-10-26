@@ -3,6 +3,7 @@ import {
   CHALLENGE_COLLECTION,
   CHALLENGE_COMPLETION_COLLECTION,
   BIG_STORE_COLLECTION,
+  ACCOUNT_AUTHORIZATION_COLLECTION
 } from './constants';
 
 interface Selector {
@@ -28,6 +29,11 @@ namespace Selector {
 
   export const bigStore = (id: string): Selector => ({
     collection: BIG_STORE_COLLECTION,
+    id,
+  });
+
+  export const accountAuthorization = (id: string): Selector => ({
+    collection: ACCOUNT_AUTHORIZATION_COLLECTION,
     id,
   });
 }
