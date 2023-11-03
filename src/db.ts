@@ -7,7 +7,7 @@ import Error from './model/Error';
 import List from './model/List';
 import firestore from './firestore';
 import Cache from './Cache';
-import { CHALLENGE_COMPLETION_COLLECTION, ACCOUNT_AUTHORIZATION_COLLECTION } from './model/constants';
+import { CHALLENGE_COMPLETION_COLLECTION, USER_VERIFICATION_COLLECTION } from './model/constants';
 
 const USER_ID_REQUIRED = new Set([
   CHALLENGE_COMPLETION_COLLECTION,
@@ -36,7 +36,7 @@ class Db {
 
       return `user/${userId}/${selector.collection}`;
     }
-    if (selector.collection === ACCOUNT_AUTHORIZATION_COLLECTION) {
+    if (selector.collection === USER_VERIFICATION_COLLECTION) {
       if (!userId) throw {
         type: 'error',
         message: 'User ID is required for this collection.',
