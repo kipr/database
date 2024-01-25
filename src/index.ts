@@ -9,7 +9,7 @@ import Db from './db';
 import RedisCache from './RedisCache';
 import Selector from './model/Selector';
 import authorize, { AuthorizeResult } from './authorize';
-import { CHALLENGE_COMPLETION_COLLECTION } from './model/constants';
+import { CHALLENGE_COMPLETION_COLLECTION, USER_COLLECTION } from './model/constants';
 
 import bigStore from './big-store';
 
@@ -56,7 +56,7 @@ app.get('/:collection/:id', async (request, reply) => {
 
   const selector: Selector = { collection, id };
 
-  const authRes = await authorize(selector, token.sub, db);
+  const authRes = await authorize(selector, token, db);
   if (authRes.type === AuthorizeResult.Type.NotAuthorized) {
     if (authRes.exists) return unauthorized(reply);
     else return notFound(reply);
@@ -91,25 +91,27 @@ app.post('/:collection/:id', async (request, reply) => {
   if (!token) return unauthorized(reply);
 
   const { collection, id } = request.params as { collection: string; id: string; };
-  
+
   const selector: Selector = { collection, id };
 
   const value = request.body as object;
 
   if (collection !== CHALLENGE_COMPLETION_COLLECTION) {
-    const authRes = await authorize(selector, token.sub, db);
+    const authRes = await authorize(selector, token, db);
     if (authRes.type === AuthorizeResult.Type.NotAuthorized) {
       if (authRes.exists) {
         console.error('Exists but not authorized');
         return unauthorized(reply);
       }
 
-      if (!('author' in value)) return unauthorized(reply);
-      const author = value['author'];
-      if (typeof author !== 'object' || !('type' in author)) return unauthorized(reply);
-      if (author.type !== Author.Type.User) return unauthorized(reply);
-      if (!('id' in author)) return unauthorized(reply);
-      if (author.id !== token.sub) return unauthorized(reply);
+      if (collection !== USER_COLLECTION) {
+        if (!('author' in value)) return unauthorized(reply);
+        const author = value['author'];
+        if (typeof author !== 'object' || !('type' in author)) return unauthorized(reply);
+        if (author.type !== Author.Type.User) return unauthorized(reply);
+        if (!('id' in author)) return unauthorized(reply);
+        if (author.id !== token.sub) return unauthorized(reply);
+      }
     } else if (!authRes.write) {
       console.error('User tried to write to a collection they do not have write access to');
       return unauthorized(reply);
@@ -136,7 +138,7 @@ app.delete('/:collection/:id', async (request, reply) => {
 
   const selector: Selector = { collection, id };
 
-  const authRes = await authorize(selector, token.sub, db);
+  const authRes = await authorize(selector, token, db);
   if (authRes.type === AuthorizeResult.Type.NotAuthorized) return unauthorized(reply);
   if (!authRes.write) return unauthorized(reply);
 
