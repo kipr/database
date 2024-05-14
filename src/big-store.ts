@@ -63,8 +63,9 @@ export default (app: FastifyInstance, db: Db) => {
         return;
       }
 
+      const cloudStorageUri = bucket.file(hash).cloudStorageURI;
       reply.code(200).send({
-        hash,
+        cloudStorageUri,
       });
     });
 

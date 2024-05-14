@@ -158,6 +158,8 @@ app.delete('/:collection/:id', async (request, reply) => {
 
 if (config.googleStorage.serviceAccountKey && config.googleStorage.projectId && config.googleStorage.bucketName) {
   bigStore(app, db);
+} else {
+  console.log('Config not set for Google Storage, so big store APIs will not be available');
 }
 
 
