@@ -148,6 +148,39 @@ class Db {
       message: `Collection "${collection}" is invalid.`,
     };
 
+
+    if (collection === CHALLENGE_COMPLETION_COLLECTION) {
+      const challengeRef = firestore.collectionGroup('challenge_completion')
+      const challengeSnapshot = await challengeRef.get();
+      const groupData = {};
+      const userData = {};
+      challengeSnapshot.forEach((doc) => {
+        const id = doc.ref.parent.parent.id;
+        const data = doc.data();
+        if (author.id !== id) {
+          if (groupData[id]) {
+            groupData[id][doc.id] = data;
+            return;
+          }
+          groupData[id] = {[doc.id]: doc.data()};
+        } else {
+          if (userData[id]) {
+            userData[id][doc.id] = data;
+            return;
+          }
+          userData[id] = {[doc.id]: doc.data()};
+        }
+      });
+      const values = {
+        groupData,
+        userData,
+      };
+      return {
+        type: 'success',
+        values: values,
+      };
+    }
+
     const docs = await firestore
       .collection(collection)
       .where('author.id', '==', author.id)
