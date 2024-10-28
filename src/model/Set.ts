@@ -6,6 +6,7 @@ namespace Set {
     selector: Selector;
     userId?: string;
     value: T;
+    partialUpdate?: boolean;
   }
 
   export namespace Response {

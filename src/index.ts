@@ -84,7 +84,7 @@ app.get('/:collection', async (request, reply) => {
   reply.code(200).send(res.values);
 });
 
-app.post('/:collection/:id', async (request, reply) => {
+const createPostPatchHandler = (isPatch: boolean) => async (request: FastifyRequest, reply: FastifyReply) => {
   const token = await authenticate(request);
   console.log('token', token);
 
@@ -118,7 +118,7 @@ app.post('/:collection/:id', async (request, reply) => {
     }
   }
 
-  const res = await db.set({ selector: { collection, id }, value, userId: token.sub });
+  const res = await db.set({ selector: { collection, id }, value, userId: token.sub, partialUpdate: isPatch });
 
   console.log(res);
 
@@ -128,7 +128,11 @@ app.post('/:collection/:id', async (request, reply) => {
   }
 
   reply.code(204).send();
-});
+};
+
+app.post('/:collection/:id', createPostPatchHandler(false));
+
+app.patch('/:collection/:id', createPostPatchHandler(true));
 
 app.delete('/:collection/:id', async (request, reply) => {
   const token = await authenticate(request);
