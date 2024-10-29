@@ -93,7 +93,7 @@ class Db {
     };
   };
 
-  async set({ selector, userId, value }: Set.Request): Promise<Set.Response> {
+  async set({ selector, userId, value, partialUpdate }: Set.Request): Promise<Set.Response> {
     let fCollection: string;
     try {
       fCollection = Db.toFirebaseCollection_({ selector, userId });
@@ -101,15 +101,27 @@ class Db {
       return e as Error;
     }
 
-    await firestore
+    const docRef = firestore
       .collection(fCollection)
-      .doc(selector.id)
-      .set(value);
+      .doc(selector.id);
+    
+    if (partialUpdate) {
+      // Only replace the fields that are present in the value
 
-    try {
-      await this.cache_.set(selector, value);
-    } catch (e) {
-      console.error(e);
+      // To update the cache, we'd have to either 1) compute the full doc manually, or 2) fetch the updated doc from firestore
+      // Instead, just delete the cache entry and let it repopulate on next read
+      await this.cache_.remove(selector);
+
+      const keysToReplace = Object.keys(value);
+      await docRef.set(value, { mergeFields: keysToReplace });
+    } else {
+      await docRef.set(value);
+
+      try {
+        await this.cache_.set(selector, value);
+      } catch (e) {
+        console.error(e);
+      }
     }
 
     return {

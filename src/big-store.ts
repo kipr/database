@@ -24,6 +24,17 @@ export default (app: FastifyInstance, db: Db) => {
     // Generate random file name
     const fileName = crypto.randomBytes(8).toString('hex');
 
+    // Parse metadata header
+    let fileMetadata = {};
+    try {
+      const fileMetadataHeader = request.headers['big-store-metadata'];
+      if (typeof fileMetadataHeader === 'string') {
+        fileMetadata = JSON.parse(fileMetadataHeader);
+      }
+    } catch {
+      // Ignore improper metadata
+    }
+
     // Create sha-512 hasher
     const hasher = crypto.createHash('sha512');
 
@@ -32,6 +43,10 @@ export default (app: FastifyInstance, db: Db) => {
     const writeStream = uploadFile.createWriteStream({
       chunkSize: 1024 * 1024,
       contentType: request.headers['content-type'],
+      metadata: {
+        // Nested metadata object is for custom metadata
+        metadata: fileMetadata,
+      },
     });
 
     const contentType = request.headers['content-type'];
@@ -45,12 +60,14 @@ export default (app: FastifyInstance, db: Db) => {
     });
 
     writeStream.on('finish', async () => {
-      // Finalize the hash
+      // Finalize the filename using prefix (if provided) and hash
+      const prefix = request.headers['big-store-prefix'];
       const hash = base64UrlEncode(hasher.digest('base64'));
+      const finalFileName = prefix ? `${prefix}/${hash}` : hash;
 
       try {
         // Rename the file to the hash
-        await uploadFile.move(hash);
+        await uploadFile.move(finalFileName);
       } catch (err) {
 
         // delete the file
@@ -63,8 +80,9 @@ export default (app: FastifyInstance, db: Db) => {
         return;
       }
 
+      const cloudStorageUri = bucket.file(finalFileName).cloudStorageURI;
       reply.code(200).send({
-        hash,
+        cloudStorageUri,
       });
     });
 
