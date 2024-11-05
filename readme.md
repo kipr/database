@@ -45,7 +45,7 @@ yarn build
 
 ## Execution
 
-Redis server must be running.
+Redis server must be running. (Check with redis-cli)
 
 ```sh
 FIREBASE_SERVICE_ACCOUNT_KEY_FILE=service_account_key.json FIREBASE_DATABASE_URL=https://kipr-321905-default-rtdb.firebaseio.com yarn start
