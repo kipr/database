@@ -86,7 +86,6 @@ app.get('/:collection', async (request, reply) => {
 
 const createPostPatchHandler = (isPatch: boolean) => async (request: FastifyRequest, reply: FastifyReply) => {
   const token = await authenticate(request);
-  console.log('token', token);
 
   if (!token) return unauthorized(reply);
 
@@ -119,8 +118,6 @@ const createPostPatchHandler = (isPatch: boolean) => async (request: FastifyRequ
   }
 
   const res = await db.set({ selector: { collection, id }, value, userId: token.sub, partialUpdate: isPatch });
-
-  console.log(res);
 
   if (res.type === 'error') {
     reply.code(res.code).send({ message: res.message });
