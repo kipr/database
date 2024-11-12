@@ -9,8 +9,6 @@ interface Args {
 }
 
 export default async (args: Args) => {
-  console.log('adasdasd');
-  console.log(args);
   const res = await axios({
     method: 'get',
     url: `${args.url}/v1/big_store/${args.asset}`,

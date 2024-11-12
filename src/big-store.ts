@@ -50,7 +50,6 @@ export default (app: FastifyInstance, db: Db) => {
     });
 
     const contentType = request.headers['content-type'];
-    console.log ('content-type', contentType);
 
     writeStream.on('error', (err) => {
       console.error(err);
