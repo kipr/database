@@ -57,9 +57,11 @@ class Db {
     } catch (e) {
       return e as Error;
     }
+
+    const cacheSelector: Selector = { ...selector, collection: fCollection };
     
     try {
-      const cached = await this.cache_.get(selector);
+      const cached = await this.cache_.get(cacheSelector);
     
       if (cached) return {
         type: 'success',
@@ -82,7 +84,7 @@ class Db {
 
     try {
       // Update the cache
-      await this.cache_.set(selector, doc.data());
+      await this.cache_.set(cacheSelector, doc.data());
     } catch (e) {
       console.error(e);
     }
@@ -105,12 +107,14 @@ class Db {
       .collection(fCollection)
       .doc(selector.id);
     
+    const cacheSelector: Selector = { ...selector, collection: fCollection };
+    
     if (partialUpdate) {
       // Only replace the fields that are present in the value
 
       // To update the cache, we'd have to either 1) compute the full doc manually, or 2) fetch the updated doc from firestore
       // Instead, just delete the cache entry and let it repopulate on next read
-      await this.cache_.remove(selector);
+      await this.cache_.remove(cacheSelector);
 
       const keysToReplace = Object.keys(value);
       await docRef.set(value, { mergeFields: keysToReplace });
@@ -118,7 +122,7 @@ class Db {
       await docRef.set(value);
 
       try {
-        await this.cache_.set(selector, value);
+        await this.cache_.set(cacheSelector, value);
       } catch (e) {
         console.error(e);
       }
@@ -137,8 +141,10 @@ class Db {
       return e as Error;
     }
 
+    const cacheSelector: Selector = { ...selector, collection: fCollection };
+
     try {
-      await this.cache_.remove(selector);
+      await this.cache_.remove(cacheSelector);
     } catch (e) {
       console.error(e);
     }
