@@ -12,6 +12,7 @@ import authorize, { AuthorizeResult } from './authorize';
 import { CHALLENGE_COMPLETION_COLLECTION, USER_COLLECTION } from './model/constants';
 
 import bigStore from './big-store';
+import { register as metricsRegister } from './metrics';
 
 const UNAUTHORIZED_RESULT = { message: 'Unauthorized' };
 const NOT_FOUND_RESULT = { message: 'Not Found' };
@@ -45,6 +46,12 @@ const db = new Db(cache);
 // silly liveness probe
 app.get('/', async (request, reply) => {
   reply.send({ database: 'alive' });
+});
+
+// Prometheus metrics endpoint
+app.get('/metrics', async (request, reply) => {
+  reply.header('Content-Type', metricsRegister.contentType);
+  reply.send(await metricsRegister.metrics());
 });
 
 app.get('/:collection/:id', async (request, reply) => {

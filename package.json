@@ -16,7 +16,8 @@
     "@google-cloud/storage": "^6.9.3",
     "fastify": "^4.9.2",
     "firebase-admin": "^11.2.0",
-    "ioredis": "^5.2.3"
+    "ioredis": "^5.2.3",
+    "prom-client": "^14.2.0"
   },
   "devDependencies": {
     "@types/argparse": "^2.0.10",
