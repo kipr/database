@@ -60,16 +60,12 @@ class Db {
 
     const cacheSelector: Selector = { ...selector, collection: fCollection };
     
-    try {
-      const cached = await this.cache_.get(cacheSelector);
+    const cached = await this.cache_.get(cacheSelector);
     
-      if (cached) return {
-        type: 'success',
-        value: cached as T,
-      };
-    } catch (e) {
-      console.error(e);
-    }
+    if (cached) return {
+      type: 'success',
+      value: cached as T,
+    };
 
     const doc = await firestore
       .collection(fCollection)
@@ -82,11 +78,12 @@ class Db {
       message: `Document "${selector.id}" not found.`,
     };
 
+    // Populate the cache with fresh data from Firestore (cache-aside pattern)
     try {
-      // Update the cache
       await this.cache_.set(cacheSelector, doc.data());
     } catch (e) {
-      console.error(e);
+      console.error('Failed to populate cache after read:', e);
+      // Continue - cache is optional
     }
 
     return {
@@ -120,12 +117,7 @@ class Db {
       await docRef.set(value, { mergeFields: keysToReplace });
     } else {
       await docRef.set(value);
-
-      try {
-        await this.cache_.set(cacheSelector, value);
-      } catch (e) {
-        console.error(e);
-      }
+      await this.cache_.set(cacheSelector, value);
     }
 
     return {
@@ -143,11 +135,7 @@ class Db {
 
     const cacheSelector: Selector = { ...selector, collection: fCollection };
 
-    try {
-      await this.cache_.remove(cacheSelector);
-    } catch (e) {
-      console.error(e);
-    }
+    await this.cache_.remove(cacheSelector);
 
     await firestore
       .collection(fCollection)
