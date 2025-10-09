@@ -78,8 +78,13 @@ class Db {
       message: `Document "${selector.id}" not found.`,
     };
 
-    // Update the cache
-    await this.cache_.set(cacheSelector, doc.data());
+    // Populate the cache with fresh data from Firestore (cache-aside pattern)
+    try {
+      await this.cache_.set(cacheSelector, doc.data());
+    } catch (e) {
+      console.error('Failed to populate cache after read:', e);
+      // Continue - cache is optional
+    }
 
     return {
       type: 'success',

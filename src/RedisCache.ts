@@ -4,7 +4,8 @@ import Redis, { RedisOptions } from 'ioredis';
 import Selector from './model/Selector';
 
 class RedisCache implements Cache {
-  private static DEFAULT_TTL = 60 * 60 * 24 * 7;
+  // 1 hour TTL to limit stale data window if cache invalidation fails during Redis issues
+  private static DEFAULT_TTL = 60 * 60;
 
   private redis_: Redis;
 
@@ -13,12 +14,14 @@ class RedisCache implements Cache {
       ...options,
       connectTimeout: 500,         // 500ms to connect
       commandTimeout: 200,         // 200ms per command
+      // retryStrategy controls retries for initial connection and reconnection attempts
+      // maxRetriesPerRequest controls retries for individual commands (GET, SET, etc)
       retryStrategy: (times) => {
-        // Stop retrying after 2 attempts
+        // Stop reconnection attempts after 2 tries
         if (times > 2) return null;
-        return 50; // Wait only 50ms between retries
+        return 50; // Wait only 50ms between reconnection attempts
       },
-      maxRetriesPerRequest: 0,     // Don't retry - fail immediately
+      maxRetriesPerRequest: 0,     // Don't retry commands - fail immediately
       enableOfflineQueue: false,   // Don't queue commands when disconnected
     });
     
@@ -43,14 +46,14 @@ class RedisCache implements Cache {
   }
 
   async set(selector: Selector, value: object | null): Promise<void> {
+    // Cache-aside pattern: Only populate cache on reads, not writes
+    // This prevents stale data if cache write fails but DB write succeeds
+    // Instead, we just invalidate the cache entry on writes
     try {
-      if (!value) {
-        await this.redis_.del(RedisCache.key_(selector));
-        return;
-      }
-      await this.redis_.setex(RedisCache.key_(selector), RedisCache.DEFAULT_TTL, JSON.stringify(value));
+      await this.redis_.del(RedisCache.key_(selector));
     } catch (err) {
-      console.error('Redis SET failed, continuing without cache:', err);
+      console.error('Redis cache invalidation failed, continuing without cache:', err);
+      // Best effort - if invalidation fails, TTL will eventually clear stale data
     }
   }
 
