@@ -3,4 +3,6 @@ export const USER_COLLECTION = 'user';
 export const SCENE_COLLECTION = 'scene';
 export const CHALLENGE_COLLECTION = 'challenge';
 export const CHALLENGE_COMPLETION_COLLECTION = 'challenge_completion';
+export const PROJECT_COLLECTION = 'project';
+export const FILE_COLLECTION = 'file';
 export const USER_VERIFICATION_COLLECTION = 'user_verification';

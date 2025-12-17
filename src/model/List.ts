@@ -7,6 +7,7 @@ namespace List {
   export interface Request<T = any> {
     author: Author;
     collection: string;
+    subCollectionIds?: Record<string, string>;
     userId?: string;
   }
 

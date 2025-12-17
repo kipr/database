@@ -12,6 +12,7 @@ import authorize, { AuthorizeResult } from './authorize';
 import { CHALLENGE_COMPLETION_COLLECTION, USER_COLLECTION } from './model/constants';
 
 import bigStore from './big-store';
+import { parseCollectionSegment } from './collectionParser';
 
 const UNAUTHORIZED_RESULT = { message: 'Unauthorized' };
 const NOT_FOUND_RESULT = { message: 'Not Found' };
@@ -47,14 +48,31 @@ app.get('/', async (request, reply) => {
   reply.send({ database: 'alive' });
 });
 
-app.get('/:collection/:id', async (request, reply) => {
+// Helper to extract collection + params from a route param
+const parseCollectionFromParams = (collectionSegment: string, reply: FastifyReply) => {
+  const parsed = parseCollectionSegment(collectionSegment);
+  if (!parsed) {
+    reply.code(400).send({ message: 'Malformed collection segment' });
+    return null;
+  }
+  
+  return parsed;
+};
+
+app.get('/:collectionSegment/:id', async (request, reply) => {
   const token = await authenticate(request);
 
   if (!token) return unauthorized(reply);
 
-  const { collection, id } = request.params as { collection: string; id: string; };
+  const { collectionSegment, id } = request.params as { collectionSegment: string; id: string; };
+  const parsed = parseCollectionFromParams(collectionSegment, reply);
+  if (!parsed) return; // response already sent
+  const { collection, params: collectionParams } = parsed;
 
-  const selector: Selector = { collection, id };
+  const selector: Selector = { collection, id, subCollectionIds: collectionParams };
+
+  // Expose parsed collection params via reply header for now (could also attach to request)
+  // (request as any).collectionParams = collectionParams;
 
   const authRes = await authorize(selector, token, db);
   if (authRes.type === AuthorizeResult.Type.NotAuthorized) {
@@ -67,14 +85,21 @@ app.get('/:collection/:id', async (request, reply) => {
   reply.code(200).send(authRes.value);
 });
 
-app.get('/:collection', async (request, reply) => {
+app.get('/:collectionSegment', async (request, reply) => {
   const token = await authenticate(request);
 
   if (!token) return unauthorized(reply);
+  const { collectionSegment } = request.params as { collectionSegment: string; };
+  const parsed = parseCollectionFromParams(collectionSegment, reply);
+  if (!parsed) return;
+  const { collection, params: collectionParams } = parsed;
 
-  const { collection } = request.params as { collection: string; };
-
-  const res = await db.list({ author: Author.user(token.sub), collection });
+  const res = await db.list({
+    author: Author.user(token.sub),
+    collection,
+    subCollectionIds: collectionParams,
+    userId: token.sub
+  });
 
   if (res.type === 'error') {
     reply.code(res.code).send({ message: res.message });
@@ -89,9 +114,13 @@ const createPostPatchHandler = (isPatch: boolean) => async (request: FastifyRequ
 
   if (!token) return unauthorized(reply);
 
-  const { collection, id } = request.params as { collection: string; id: string; };
+  const { collectionSegment, id } = request.params as { collectionSegment: string; id: string; };
+  const parsed = parseCollectionFromParams(collectionSegment, reply);
+  if (!parsed) return;
+  const { collection, params: collectionParams } = parsed;
+  // (request as any).collectionParams = collectionParams;
 
-  const selector: Selector = { collection, id };
+  const selector: Selector = { collection, id, subCollectionIds: collectionParams };
 
   const value = request.body as object;
 
@@ -117,7 +146,7 @@ const createPostPatchHandler = (isPatch: boolean) => async (request: FastifyRequ
     }
   }
 
-  const res = await db.set({ selector: { collection, id }, value, userId: token.sub, partialUpdate: isPatch });
+  const res = await db.set({ selector, value, userId: token.sub, partialUpdate: isPatch });
 
   if (res.type === 'error') {
     reply.code(res.code).send({ message: res.message });
@@ -127,17 +156,20 @@ const createPostPatchHandler = (isPatch: boolean) => async (request: FastifyRequ
   reply.code(204).send();
 };
 
-app.post('/:collection/:id', createPostPatchHandler(false));
+app.post('/:collectionSegment/:id', createPostPatchHandler(false));
 
-app.patch('/:collection/:id', createPostPatchHandler(true));
+app.patch('/:collectionSegment/:id', createPostPatchHandler(true));
 
-app.delete('/:collection/:id', async (request, reply) => {
+app.delete('/:collectionSegment/:id', async (request, reply) => {
   const token = await authenticate(request);
   if (!token) return unauthorized(reply);
+  const { collectionSegment, id } = request.params as { collectionSegment: string; id: string; };
+  const parsed = parseCollectionFromParams(collectionSegment, reply);
+  if (!parsed) return;
+  const { collection, params: collectionParams } = parsed;
+  // (request as any).collectionParams = collectionParams;
 
-  const { collection, id } = request.params as { collection: string; id: string; };
-
-  const selector: Selector = { collection, id };
+  const selector: Selector = { collection, id, subCollectionIds: collectionParams };
 
   const authRes = await authorize(selector, token, db);
   if (authRes.type === AuthorizeResult.Type.NotAuthorized) return unauthorized(reply);

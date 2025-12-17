@@ -7,10 +7,12 @@ import Error from './model/Error';
 import List from './model/List';
 import firestore from './firestore';
 import Cache from './Cache';
-import { CHALLENGE_COMPLETION_COLLECTION, USER_VERIFICATION_COLLECTION } from './model/constants';
+import { CHALLENGE_COMPLETION_COLLECTION, FILE_COLLECTION, PROJECT_COLLECTION, USER_COLLECTION, USER_VERIFICATION_COLLECTION } from './model/constants';
 
 const USER_ID_REQUIRED = new Set([
   CHALLENGE_COMPLETION_COLLECTION,
+  USER_VERIFICATION_COLLECTION,
+  PROJECT_COLLECTION,
 ]);
 
 class Db {
@@ -27,25 +29,34 @@ class Db {
       message: `Collection "${selector.collection}" is invalid.`
     } as Error;
 
-    if (selector.collection === CHALLENGE_COMPLETION_COLLECTION) {
+    let fCollection = selector.collection;
+    let needsUserPrefix = USER_ID_REQUIRED.has(selector.collection);
+
+    // For files, we need to nest them under their project
+    if (selector.collection === FILE_COLLECTION) {
+      if (!selector.subCollectionIds || !selector.subCollectionIds.projectId) throw {
+        type: 'error',
+        message: 'Project ID is required for this collection.',
+        code: Error.CODE_NOT_AUTHORIZED,
+      } as Error;
+
+      fCollection = `${PROJECT_COLLECTION}/${selector.subCollectionIds.projectId}/${fCollection}`;
+      // Files are nested under projects, which require user prefix
+      needsUserPrefix = true;
+    }
+
+    // For certain collections, we need to nest them under their user
+    if (needsUserPrefix) {
       if (!userId) throw {
         type: 'error',
         message: 'User ID is required for this collection.',
         code: Error.CODE_NOT_AUTHORIZED,
       } as Error;
 
-      return `user/${userId}/${selector.collection}`;
+      fCollection = `${USER_COLLECTION}/${userId}/${fCollection}`;
     }
-    if (selector.collection === USER_VERIFICATION_COLLECTION) {
-      if (!userId) throw {
-        type: 'error',
-        message: 'User ID is required for this collection.',
-        code: Error.CODE_NOT_AUTHORIZED,
-      } as Error;
 
-      return `user/${userId}/${selector.collection}`;
-    }
-    return selector.collection;
+    return fCollection;
   }
 
 
@@ -159,14 +170,62 @@ class Db {
     };
   }
 
-  async list({ author, collection }: List.Request): Promise<List.Response> {
+  async list({ author, collection, subCollectionIds, userId }: List.Request): Promise<List.Response> {
     if (!collections.has(collection)) return {
       type: 'error',
       code: Error.CODE_NOT_FOUND,
       message: `Collection "${collection}" is invalid.`,
     };
 
+    // Special handling for files nested under projects
+    if (collection === FILE_COLLECTION) {
+      if (!subCollectionIds || !subCollectionIds.projectId) {
+        return {
+          type: 'error',
+          code: Error.CODE_NOT_AUTHORIZED,
+          message: 'Project ID is required to list files.',
+        };
+      }
 
+      const fCollection = Db.toFirebaseCollection_({
+        selector: { collection, id: '', subCollectionIds },
+        userId
+      });
+
+      const docs = await firestore
+        .collection(fCollection)
+        .where('author.id', '==', author.id)
+        .get();
+
+      const values = {};
+      for (const doc of docs.docs) values[doc.id] = doc.data();
+
+      return { type: 'success', values };
+    }
+
+    // Special handling for projects (nested under users)
+    if (USER_ID_REQUIRED.has(collection)) {
+      if (!userId) {
+        return {
+          type: 'error',
+          code: Error.CODE_NOT_AUTHORIZED,
+          message: 'User ID is required for this collection.',
+        };
+      }
+
+      const fCollection = `${USER_COLLECTION}/${userId}/${collection}`;
+      const docs = await firestore
+        .collection(fCollection)
+        .where('author.id', '==', author.id)
+        .get();
+
+      const values = {};
+      for (const doc of docs.docs) values[doc.id] = doc.data();
+
+      return { type: 'success', values };
+    }
+
+    // Special handling for challenge_completion
     if (collection === CHALLENGE_COMPLETION_COLLECTION) {
       const challengeRef = firestore.collectionGroup('challenge_completion')
       const challengeSnapshot = await challengeRef.get();
@@ -199,6 +258,7 @@ class Db {
       };
     }
 
+    // Default: top-level collections
     const docs = await firestore
       .collection(collection)
       .where('author.id', '==', author.id)

@@ -3,11 +3,14 @@ import {
   CHALLENGE_COLLECTION,
   CHALLENGE_COMPLETION_COLLECTION,
   BIG_STORE_COLLECTION,
-  USER_VERIFICATION_COLLECTION
+  USER_VERIFICATION_COLLECTION,
+  PROJECT_COLLECTION,
+  FILE_COLLECTION
 } from './constants';
 
 interface Selector {
   collection: string;
+  subCollectionIds?: Record<string, string>;
   id: string;
 }
 
@@ -35,6 +38,17 @@ namespace Selector {
   export const userVerification = (id: string): Selector => ({
     collection: USER_VERIFICATION_COLLECTION,
     id,
+  });
+
+  export const project = (id: string): Selector => ({
+    collection: PROJECT_COLLECTION,
+    id,
+  });
+
+  export const file = (projectId: string, id: string): Selector => ({
+    collection: FILE_COLLECTION,
+    id,
+    subCollectionIds: { projectId },
   });
 }
 
